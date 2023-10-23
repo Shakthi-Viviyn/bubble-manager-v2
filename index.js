@@ -1,82 +1,70 @@
 const svg = d3.select("svg");
 
-// Define your nodes and links
-const nodes = [
-    { id: "A", x: 100, y: 100, r: 50 },
-    { id: "B", x: 200, y: 200, r: 30 },
-    { id: "C", x: 300, y: 300, r: 10 },
-    { id: "D", x: 150, y: 250, r: 50 },
-    { id: "E", x: 250, y: 150, r: 30 },
-    { id: "F", x: 350, y: 350, r: 10 },
-    { id: "G", x: 50, y: 50, r: 50 },
-    { id: "H", x: 400, y: 100, r: 30 },
-    { id: "I", x: 100, y: 400, r: 10 },
-    { id: "J", x: 450, y: 450, r: 10 },
-    { id: "K", x: 600, y: 200, r: 50 },
-    { id: "L", x: 700, y: 300, r: 30 },
-    { id: "M", x: 800, y: 100, r: 50 },
-    { id: "N", x: 550, y: 250, r: 10 },
-    { id: "O", x: 650, y: 150, r: 50 },
-    { id: "P", x: 750, y: 350, r: 30 },
-    { id: "Q", x: 700, y: 450, r: 10 },
-    { id: "R", x: 900, y: 50, r: 50 },
-    { id: "S", x: 950, y: 400, r: 30 },
-    { id: "T", x: 800, y: 400, r: 10 },
-    { id: "U", x: 750, y: 200, r: 50 },
-    { id: "V", x: 900, y: 300, r: 10 },
-    { id: "W", x: 200, y: 50, r: 50 },
-    { id: "X", x: 100, y: 350, r: 30 },
-    { id: "Y", x: 300, y: 600, r: 50 },
-    { id: "Z", x: 500, y: 550, r: 30 },
-    { id: "AA", x: 650, y: 450, r: 10 },
-    { id: "AB", x: 450, y: 150, r: 50 },
-    { id: "AC", x: 550, y: 350, r: 30 },
-    { id: "AD", x: 750, y: 550, r: 10 },
-  ];
-  
-  const links = [
-    { source: 0, target: 1 }, 
-    // { source: 1, target: 2 },
-    // { source: 2, target: 0 },
-  ];
+let svgWidth = document.querySelector("svg").clientWidth;
+let svgHeight = document.querySelector("svg").clientHeight;
+console.log(svgWidth, svgHeight);
 
-// Create node elements
+const nodes = [
+  { id: "A", x: 100, y: 100, r: 100, c: "red" },
+  { id: "B", x: 200, y: 200, r: 50, c: "green" },
+  { id: "C", x: 300, y: 300, r: 30, c: "blue" },
+  { id: "D", x: 400, y: 400, r: 100, c: "purple" },
+  { id: "E", x: 500, y: 500, r: 50, c: "orange" },
+  { id: "F", x: 600, y: 600, r: 30, c: "pink" },
+  { id: "G", x: 700, y: 700, r: 100, c: "cyan" },
+  { id: "H", x: 800, y: 800, r: 50, c: "yellow" },
+  { id: "I", x: 900, y: 900, r: 30, c: "magenta" },
+  { id: "J", x: 100, y: 900, r: 100, c: "indigo" },
+  { id: "K", x: 200, y: 800, r: 50, c: "teal" },
+  { id: "L", x: 300, y: 700, r: 30, c: "brown" },
+  { id: "M", x: 400, y: 600, r: 100, c: "violet" },
+  { id: "N", x: 500, y: 500, r: 50, c: "grey" },
+  { id: "O", x: 600, y: 400, r: 30, c: "black" },
+  { id: "P", x: 700, y: 300, r: 100, c: "white" },
+  { id: "Q", x: 800, y: 200, r: 50, c: "olive" },
+  { id: "R", x: 900, y: 100, r: 30, c: "cyan" },
+  { id: "S", x: 100, y: 100, r: 100, c: "pink" },
+  { id: "T", x: 200, y: 200, r: 50, c: "orange" },
+  { id: "U", x: 300, y: 300, r: 30, c: "blue" },
+  { id: "V", x: 400, y: 400, r: 100, c: "red" },
+  { id: "W", x: 500, y: 500, r: 50, c: "green" },
+  { id: "X", x: 600, y: 600, r: 30, c: "yellow" },
+  { id: "Y", x: 700, y: 700, r: 100, c: "magenta" },
+  { id: "Z", x: 800, y: 800, r: 50, c: "cyan" },
+  { id: "AA", x: 900, y: 900, r: 30, c: "teal" },
+  { id: "AB", x: 100, y: 900, r: 100, c: "brown" },
+  { id: "AC", x: 200, y: 800, r: 50, c: "violet" },
+  { id: "AD", x: 300, y: 700, r: 30, c: "indigo" }
+];
+
 const node = svg.selectAll(".node")
   .data(nodes)
-  .enter().append("circle")
+  .enter()
+  .append("g")
   .attr("class", "node")
-  .attr("r", d => d.r);
+  .attr("transform", d => `translate(${d.x}, ${d.y})`)
 
+const circles = node.append("circle")
+  .attr("r", d => d.r)
+  .attr("fill", d => d.c || "grey")
+  .attr("stroke", "black")
 
-// Create a simulation with forces
+const text = node.append("text")
+  .text(d => d.id)
+  .attr("text-anchor", "middle")
+  .attr("dy", ".35em");
+
 const simulation = d3.forceSimulation(nodes)
-//   .force("link", d3.forceLink(links).distance(150))
-//   .force("charge", d3.forceManyBody().strength(100))
-//   .force("center", d3.forceCenter(400, 300));
-    .force("x", d3.forceX(700)) 
-    .force("y", d3.forceY(400))
-    // .force("radial", d3.forceRadial(240, 500, 400))
-    .force("collide", d3.forceCollide(d => d.r + 5))
+    .force("x", d3.forceX(0).strength(0.05)) 
+    .force("y", d3.forceY(0).strength(0.05))
+    .force("center", d3.forceCenter(700, 400))
+    .force("collide", d3.forceCollide(d => d.r + 5).strength(0.8))
 
-// Create link elements
-const link = svg.selectAll(".link")
-  .data(links)
-  .enter().append("line")
-  .attr("class", "link")
-  .attr("stroke-width", 2);
-
-// Add drag behavior to nodes
-// Update positions of nodes and links
 simulation.on("tick", () => {
-  link
-    .attr("x1", d => d.source.x)
-    .attr("y1", d => d.source.y)
-    .attr("x2", d => d.target.x)
-    .attr("y2", d => d.target.y);
-
-  node
-    .attr("cx", d => d.x)
-    .attr("cy", d => d.y);
+  node.attr("transform", d => `translate(${d.x}, ${d.y})`)
+  if (simulation.alpha() < 0.001) {
+    simulation.stop();
+  }
 });
 
 node.call(d3.drag()
@@ -89,37 +77,78 @@ function dragstarted(event, d) {
   d.fx = d.x;
   d.fy = d.y;
 }
-
 function dragged(event, d) {
-  d.fx = event.x;
-  d.fy = event.y;
-}
-
+  d.fx = Math.max(50, Math.min(svgWidth - 50, event.x));
+  d.fy = Math.max(50, Math.min(svgHeight - 50, event.y));
+} 
 function dragended(event, d) {
   if (!event.active) simulation.alphaTarget(0);
   d.fx = null;
   d.fy = null;
 }
 
-let state = "attract";
 
+console.log(node);
+let hoverElemOrigRad = 0;
+
+svg.selectAll(".node").each(function(d, i) {
+  const gElement = d3.select(this);
+
+  gElement.on("mouseenter", (event, d) => {
+    event.stopPropagation();
+    hoverElemOrigRad = d.r;
+    if (d.r !== 100){
+      d.r = 100;
+      gElement.raise();
+      gElement.select("circle").transition().duration(500).attr("r", d.r);
+      setTimeout(() => {
+        simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.8));
+        simulation.alpha(0.2).restart();
+      }, 250);
+    }
+  });
+
+  gElement.on("mouseleave", (event, d) => {
+    event.stopPropagation();
+    if (hoverElemOrigRad !== 100) {
+      d.r = hoverElemOrigRad;
+      gElement.select("circle").transition().duration(500).attr("r", d.r);
+      simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.8));
+      simulation.alpha(0.2).restart();
+    }
+  });
+});
+
+
+// svg.selectAll(".node").on("mouseout", (event, d) => {
+//   console.log(this);
+//   d3.select(event.currentTarget).select("circle").transition().duration(100).attr("r", d.r);
+//   simulation.alpha(0.2).restart();
+//   event.stopPropagation();
+//   console.log("mouse-out");
+// });
+// svg.selectAll("circle").on("mouseover", (event, d) => {
+//   d3.select(event.currentTarget).raise();
+//   d3.select(event.currentTarget).transition().duration(100).attr("r", 100);
+//   simulation.alpha(0.2).restart();
+//   console.log("mouse-over");
+// });
+
+let state = "attract";
 document.querySelector("button").addEventListener("click", () => {
     if (state === "attract"){
         simulation.force("x", null);
         simulation.force("y", null);
-        simulation.force("radial", d3.forceRadial(240, 500, 400));
-        simulation.alpha(1).restart();
+        simulation.force("radial", d3.forceRadial(300, 700, 400));
+        simulation.alpha(0.2).restart();
         state = "radial";
         console.log("radial");
     }else{
-        simulation.force("x", d3.forceX(700));
-        simulation.force("y", d3.forceY(400));
+        simulation.force("x", d3.forceX(0).strength(0.05));
+        simulation.force("y", d3.forceY(0).strength(0.05));
         simulation.force("radial", null);
-        simulation.alpha(1).restart();
+        simulation.alpha(0.2).restart();
         state = "attract";
         console.log("attract");
-        setTimeout(() => {
-            simulation.alpha(1).restart();
-        }, 1000);
     }
 });
