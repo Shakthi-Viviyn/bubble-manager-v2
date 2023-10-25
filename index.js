@@ -4,7 +4,7 @@ let svgWidth = document.querySelector("svg").clientWidth;
 let svgHeight = document.querySelector("svg").clientHeight;
 console.log(svgWidth, svgHeight);
 
-const nodes = [
+let nodes = [
   { id: "A", x: 100, y: 100, r: 100, c: "red" },
   { id: "B", x: 200, y: 200, r: 50, c: "green" },
   { id: "C", x: 300, y: 300, r: 30, c: "blue" },
@@ -34,27 +34,27 @@ const nodes = [
   { id: "AA", x: 900, y: 900, r: 30, c: "teal" },
   { id: "AB", x: 100, y: 900, r: 100, c: "brown" },
   { id: "AC", x: 200, y: 800, r: 50, c: "violet" },
-  { id: "AD", x: 300, y: 700, r: 30, c: "indigo" }
+  { id: "AD", x: 300, y: 700, r: 30, c: "indigo" },
 ];
 
-const node = svg.selectAll(".node")
+let node = svg.selectAll(".node")
   .data(nodes)
   .enter()
   .append("g")
   .attr("class", "node")
   .attr("transform", d => `translate(${d.x}, ${d.y})`)
 
-const circles = node.append("circle")
+let circles = node.append("circle")
   .attr("r", d => d.r)
   .attr("fill", d => d.c || "grey")
   .attr("stroke", "black")
 
-const text = node.append("text")
+let text = node.append("text")
   .text(d => d.id)
   .attr("text-anchor", "middle")
   .attr("dy", ".35em");
 
-const simulation = d3.forceSimulation(nodes)
+let simulation = d3.forceSimulation(nodes)
     .force("x", d3.forceX(0).strength(0.05)) 
     .force("y", d3.forceY(0).strength(0.05))
     .force("center", d3.forceCenter(700, 400))
@@ -77,6 +77,7 @@ function dragstarted(event, d) {
   d.fx = d.x;
   d.fy = d.y;
 }
+
 function dragged(event, d) {
   d.fx = Math.max(50, Math.min(svgWidth - 50, event.x));
   d.fy = Math.max(50, Math.min(svgHeight - 50, event.y));
@@ -86,7 +87,6 @@ function dragended(event, d) {
   d.fx = null;
   d.fy = null;
 }
-
 
 console.log(node);
 let hoverElemOrigRad = 0;
@@ -102,53 +102,58 @@ svg.selectAll(".node").each(function(d, i) {
       gElement.raise();
       gElement.select("circle").transition().duration(500).attr("r", d.r);
       setTimeout(() => {
-        simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.8));
-        simulation.alpha(0.2).restart();
+        simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.5));
+        simulation.alpha(0.1).restart();
       }, 250);
     }
   });
-
+  
   gElement.on("mouseleave", (event, d) => {
     event.stopPropagation();
-    if (hoverElemOrigRad !== 100) {
+    if (hoverElemOrigRad !== 100){
       d.r = hoverElemOrigRad;
       gElement.select("circle").transition().duration(500).attr("r", d.r);
-      simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.8));
-      simulation.alpha(0.2).restart();
+      setTimeout(() => {
+        simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.8));
+        simulation.alpha(0.1).restart();
+      }, 500);
     }
   });
+
 });
 
-
-// svg.selectAll(".node").on("mouseout", (event, d) => {
-//   console.log(this);
-//   d3.select(event.currentTarget).select("circle").transition().duration(100).attr("r", d.r);
-//   simulation.alpha(0.2).restart();
-//   event.stopPropagation();
-//   console.log("mouse-out");
-// });
-// svg.selectAll("circle").on("mouseover", (event, d) => {
-//   d3.select(event.currentTarget).raise();
-//   d3.select(event.currentTarget).transition().duration(100).attr("r", 100);
-//   simulation.alpha(0.2).restart();
-//   console.log("mouse-over");
-// });
-
 let state = "attract";
-document.querySelector("button").addEventListener("click", () => {
+$("button").on("click", () => {
     if (state === "attract"){
         simulation.force("x", null);
         simulation.force("y", null);
         simulation.force("radial", d3.forceRadial(300, 700, 400));
-        simulation.alpha(0.2).restart();
+        simulation.alpha(0.5).restart();
         state = "radial";
-        console.log("radial");
     }else{
         simulation.force("x", d3.forceX(0).strength(0.05));
         simulation.force("y", d3.forceY(0).strength(0.05));
         simulation.force("radial", null);
-        simulation.alpha(0.2).restart();
+        simulation.alpha(0.5).restart();
         state = "attract";
-        console.log("attract");
     }
+    nodes.push({id: "New", x: 0, y: 0, r: 50, c: "orange"});
+    console.log(nodes);
+    let newNode = svg.selectAll(".node")
+        .data(nodes)
+        .enter()
+        .append("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.x}, ${d.y})`)
+        .append("circle")
+        .attr("r", d => d.r)
+        .attr("fill", d => d.c || "grey")
+        .append("text")
+        .text(d => d.id)
+        .attr("text-anchor", "middle")
+        .attr("dy", ".35em");
+      
+      node = node.merge(newNode);
+      simulation = simulation.nodes(node)
+      simulation.alpha(0.2).restart();
 });
