@@ -26,3 +26,18 @@
 //   .attr("stroke", "black");
 
 // .force("link", d3.forceLink(links).distance(50))
+
+let state = "attract";
+if (state === "attract"){
+  simulation.force("x", null);
+  simulation.force("y", null);
+  simulation.force("radial", d3.forceRadial(300, 700, 400));
+  simulation.alpha(0.5).restart();
+  state = "radial";
+}else{
+  simulation.force("x", d3.forceX(0).strength(0.05));
+  simulation.force("y", d3.forceY(0).strength(0.05));
+  simulation.force("radial", null);
+  simulation.alpha(0.5).restart();
+  state = "attract";
+}

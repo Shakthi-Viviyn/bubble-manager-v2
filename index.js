@@ -4,7 +4,7 @@ let svgWidth = document.querySelector("svg").clientWidth;
 let svgHeight = document.querySelector("svg").clientHeight;
 console.log(svgWidth, svgHeight);
 
-let nodes = [
+var nodes = [
   { id: "A", x: 100, y: 100, r: 100, c: "red" },
   { id: "B", x: 200, y: 200, r: 50, c: "green" },
   { id: "C", x: 300, y: 300, r: 30, c: "blue" },
@@ -37,7 +37,7 @@ let nodes = [
   { id: "AD", x: 300, y: 700, r: 30, c: "indigo" },
 ];
 
-let node = svg.selectAll(".node")
+var node = svg.selectAll(".node")
   .data(nodes)
   .enter()
   .append("g")
@@ -61,7 +61,9 @@ let simulation = d3.forceSimulation(nodes)
     .force("collide", d3.forceCollide(d => d.r + 5).strength(0.8))
 
 simulation.on("tick", () => {
-  node.attr("transform", d => `translate(${d.x}, ${d.y})`)
+  node.attr("transform", d => {
+    console.log(d)
+    return `translate(${d.x}, ${d.y})`})
   if (simulation.alpha() < 0.001) {
     simulation.stop();
   }
@@ -88,31 +90,29 @@ function dragended(event, d) {
   d.fy = null;
 }
 
-console.log(node);
-let hoverElemOrigRad = 0;
+function attachHoverListeners(elm){
 
-svg.selectAll(".node").each(function(d, i) {
-  const gElement = d3.select(this);
+  let hoverElemOrigRad = 0;
 
-  gElement.on("mouseenter", (event, d) => {
+  elm.on("mouseenter", (event, d) => {
     event.stopPropagation();
     hoverElemOrigRad = d.r;
     if (d.r !== 100){
       d.r = 100;
-      gElement.raise();
-      gElement.select("circle").transition().duration(500).attr("r", d.r);
+      elm.raise();
+      elm.select("circle").transition().duration(500).attr("r", d.r);
       setTimeout(() => {
         simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.5));
         simulation.alpha(0.1).restart();
       }, 250);
     }
   });
-  
-  gElement.on("mouseleave", (event, d) => {
+
+  elm.on("mouseleave", (event, d) => {
     event.stopPropagation();
     if (hoverElemOrigRad !== 100){
       d.r = hoverElemOrigRad;
-      gElement.select("circle").transition().duration(500).attr("r", d.r);
+      elm.select("circle").transition().duration(500).attr("r", d.r);
       setTimeout(() => {
         simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.8));
         simulation.alpha(0.1).restart();
@@ -120,40 +120,38 @@ svg.selectAll(".node").each(function(d, i) {
     }
   });
 
+}
+
+svg.selectAll(".node").each(function(d, i) {
+  attachHoverListeners(d3.select(this));
 });
 
-let state = "attract";
-$("button").on("click", () => {
-    if (state === "attract"){
-        simulation.force("x", null);
-        simulation.force("y", null);
-        simulation.force("radial", d3.forceRadial(300, 700, 400));
-        simulation.alpha(0.5).restart();
-        state = "radial";
-    }else{
-        simulation.force("x", d3.forceX(0).strength(0.05));
-        simulation.force("y", d3.forceY(0).strength(0.05));
-        simulation.force("radial", null);
-        simulation.alpha(0.5).restart();
-        state = "attract";
-    }
-    nodes.push({id: "New", x: 0, y: 0, r: 50, c: "orange"});
-    console.log(nodes);
-    let newNode = svg.selectAll(".node")
-        .data(nodes)
-        .enter()
-        .append("g")
-        .attr("class", "node")
-        .attr("transform", d => `translate(${d.x}, ${d.y})`)
-        .append("circle")
-        .attr("r", d => d.r)
-        .attr("fill", d => d.c || "grey")
-        .append("text")
-        .text(d => d.id)
-        .attr("text-anchor", "middle")
-        .attr("dy", ".35em");
-      
-      node = node.merge(newNode);
-      simulation = simulation.nodes(node)
-      simulation.alpha(0.2).restart();
+
+document.getElementById("addBtn").addEventListener("click", () => {
+
+    let newData = {id:"new", x: 0, y: 0, r: 50, c: "orange"};
+    nodes.push(newData);
+    let newNode = svg.append("g")
+                  .data([newData])
+                  .attr("class", "node")
+                  .attr("transform", d => `translate(${d.x}, ${d.y})`);
+    newNode.append("circle")
+          .attr("r", d => d.r)
+          .attr("fill", d => d.c || "grey")
+          .attr("stroke", "black");
+    newNode.append("text")
+          .text(d => d.id)
+          .attr("text-anchor", "middle")
+          .attr("dy", ".35em");
+
+    attachHoverListeners(newNode);
+    node = svg.selectAll(".node");
+    simulation.nodes(nodes);
+    
+    node.call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
+    simulation.alpha(0.2).restart();
+
 });
