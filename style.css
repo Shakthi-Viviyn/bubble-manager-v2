@@ -163,3 +163,40 @@ Colors:
 #color5{
     background-color: #9292C8;
 }
+
+.bubble-body{
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.bubble-text-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    padding: 0 10px 0 10px;
+    text-align: center;
+}
+
+.task-name{
+    margin-bottom: 8px;
+}
+
+.task-description{
+    display: none; 
+    margin: 8px 0 8px 0;
+}
+
+.task-date{
+    display: none;
+    margin: 8px 0 8px 0;
+}
+
+.task-time{
+    display: none;
+    margin: 8px 0 8px 0;
+}
