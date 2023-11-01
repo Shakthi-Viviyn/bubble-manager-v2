@@ -1,10 +1,58 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
 
 .canvas{
     width: 100%;
     height: 100vh;
 }
 
-#addBtn{
+.closeBtnContainer{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0 auto 0 auto;
+}
+
+#closeBtn{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-image: url("/icons/close.png");
+    background-size: cover;
+    background-position: center;
+    border: none;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease-in-out;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#addMenu{
+    position: fixed;
+    bottom: 50px;
+    left: 35px;
+    visibility: hidden;
+    width: 400px;
+    height: fit-content;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: rgba(131, 131, 131, 0.7);
+    z-index: 100;
+}
+
+#formContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.formGroup{
+    height: fit-content;
+    width: fit-content;
+}
+
+#addMenuBtn{
     position: fixed;
     bottom: 35px;
     left: 35px;
@@ -13,7 +61,7 @@
     z-index: 100;
     background-image: url("/icons/plus.png");
     border-radius: 50%;
-    border: none;
+    border: 2px solid grey;
     background-size: cover;
     background-position: center;
     transition: box-shadow 0.3s ease-in-out;
@@ -23,4 +71,95 @@
 
 #addBtn:hover {
     box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+label{
+    font-family: Arial, Helvetica, sans-serif;
+    color: black;
+    display: inline;
+}
+
+.submitBtnContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px auto 0 auto;
+}
+
+
+#addTaskBtn{
+    width: 100px;
+    height: 40px;
+    border-radius: 10px;
+    text-align: center;
+    border: none;
+    background-color: #67BB6D;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease-in-out;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.inputElements{
+    display:block;
+    margin: 20px auto 0 auto;
+    text-align: center;
+}
+
+#nameTask{
+    border: none;
+    border-radius: 6px;
+
+}
+#descriptionTask{
+    border: none;
+    border-radius: 6px;
+}
+#dateTask{
+    border: none;
+    border-radius: 6px;
+}
+#timeTask{
+    border: none;
+    border-radius: 6px;
+}
+
+#colorTask{
+    border: none;
+    border-radius: 8px;
+}
+
+.colorTable{
+    display: inline-block;
+}
+.colorBoxes{
+    height: 20px; 
+    width: 20px;
+    margin: 0 auto 0 auto;
+}
+/*
+Colors:
+1: #DB5657 (Red)
+2: #67BB6D (Green)
+3: #3DC7C7 (Sky blue)
+4: #D4DC6C (Yellow)
+5: #9292C8 (Purple)
+6: #60DAAC (Florescent Green)
+*/
+#color1{
+    background-color: #DB5657 ;
+}
+#color2{
+    background-color: #67BB6D;
+}
+#color3{
+    background-color: #3DC7C7;
+}
+#color4{
+    background-color: #D4DC6C;
+}
+#color5{
+    background-color: #9292C8;
 }

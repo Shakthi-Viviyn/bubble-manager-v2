@@ -7,10 +7,44 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <svg class="canvas">
-    </svg>
-    <button id="addBtn"></button>
+    <svg class="canvas"></svg>
+    <button id="addMenuBtn"></button>
+    <div id="addMenu">
+        <div class="closeBtnContainer">
+            <button id="closeBtn"></button>
+        </div>
+        <div id="formContainer">
+        <form class="formGroup">
+            <div class="inputElements"><label>Task Name: </label><input type="text" id="nameTask" maxlength="7" required></div>
+            <div class="inputElements"><label>Task Description: </label><input type="text" id="descriptionTask" maxlength="69" required></div>
+            <div class="inputElements"><label>Completion Date: </label><input type="date" id="dateTask" min="" required></div>
+            <div class="inputElements"><label>Time Required: </label><input type="text" id="timeTask" maxlength="12"></div>
+            <div class="inputElements">
+                <label style="position: relative; bottom: 20px;">Colour: </label>
+                <table class="colorTable">
+                    <tr>
+                        <td><div class = "colorBoxes" id="color1"></div></td>
+                        <td><div class = "colorBoxes" id="color2"></div></td>
+                        <td><div class = "colorBoxes" id="color3"></div></td>
+                        <td><div class = "colorBoxes" id="color4"></div></td>
+                        <td><div class = "colorBoxes" id="color5"></div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" id="colorTask1" name="color"></td>
+                        <td><input type="radio" id="colorTask2" name="color"></td>
+                        <td><input type="radio" id="colorTask3" name="color"></td>
+                        <td><input type="radio" id="colorTask4" name="color"></td>
+                        <td><input type="radio" id="colorTask5" name="color"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="submitBtnContainer"><input type="submit" id="addTaskBtn" value="Done"></div>
+        </form>
+    </div>
+    </div>
+
 </body>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3plus-text@1"></script>
 <script type="module" src="index.js"></script>
 </html>
