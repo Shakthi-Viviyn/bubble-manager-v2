@@ -195,6 +195,19 @@ function colorSelected(){
   }
 }
 
+function calcRadius(date){
+  date = new Date(date).getTime();
+  var dayDiff = Math.abs((date - currentDate)/(1000 * 60 * 60 * 24));
+  
+  if(dayDiff > 7){
+      return 50;
+  }else if((dayDiff <= 5)&&(dayDiff >= 2)){
+      return 80;
+  }else{
+      return 100;
+  }
+}
+
 document.getElementById("addTaskBtn").addEventListener("click", () => {
 
     let name = document.getElementById("nameTask").value;
@@ -202,10 +215,12 @@ document.getElementById("addTaskBtn").addEventListener("click", () => {
     let timeRequired = document.getElementById("timeTask").value;
     let description = document.getElementById("descriptionTask").value;
     let color = colorSelected();
-    console.log(name, date, timeRequired, description, color); 
+    let radius = calcRadius(date);
+
+    if (name === "" || date === "" || description === "") return;
 
     let id = new Date().getTime();
-    let newData = {id: id, name:name, description: description, timeRequired: timeRequired, date: date, x: 0, y: 0, r: 50, color: color};
+    let newData = {id: id, name:name, description: description, timeRequired: timeRequired, date: date, x: 0, y: 0, r: radius, color: color};
 
     nodes.push(newData);
 
