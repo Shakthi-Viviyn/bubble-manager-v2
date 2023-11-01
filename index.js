@@ -88,6 +88,8 @@ let simulation = d3.forceSimulation(nodes)
 
 simulation.on("tick", () => {
   node.attr("transform", d => {
+    d.x = Math.max(d.r, Math.min(svgWidth - d.r, d.x));
+    d.y = Math.max(d.r, Math.min(svgHeight - d.r, d.y));
     return `translate(${d.x}, ${d.y})`})
   if (simulation.alpha() < 0.001) {
     simulation.stop();
@@ -129,7 +131,6 @@ function attachHoverListeners(elm){
 
       elm.select("foreignObject").attr("width", "240").attr("height", "240").attr("x", "-120").attr("y", "-120")
       elm.select("foreignObject").selectAll(".task-hidden-info").style("display", "block");
-      // elm.select("foreignObject").select(".bubble-text-container").style("justify-content", "center");
 
       setTimeout(() => {
         simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.5));
@@ -146,7 +147,6 @@ function attachHoverListeners(elm){
 
       elm.select("foreignObject").attr("width", d.r*2).attr("height", d.r*2).attr("x", -d.r).attr("y", -d.r)
       elm.select("foreignObject").selectAll(".task-hidden-info").style("display", "none");
-      // elm.select("foreignObject").select(".bubble-text-container").style("justify-content", "center");
 
       setTimeout(() => {
         simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.8));
@@ -202,23 +202,50 @@ document.getElementById("addTaskBtn").addEventListener("click", () => {
     let timeRequired = document.getElementById("timeTask").value;
     let description = document.getElementById("descriptionTask").value;
     let color = colorSelected();
+    console.log(name, date, timeRequired, description, color); 
 
     let id = new Date().getTime();
     let newData = {id: id, name:name, description: description, timeRequired: timeRequired, date: date, x: 0, y: 0, r: 50, color: color};
+
     nodes.push(newData);
+
     let newNode = svg.append("g")
                   .data([newData])
                   .attr("class", "node")
-                  .attr("id", id)
+                  .attr("id", d => d.id)
                   .attr("transform", d => `translate(${d.x}, ${d.y})`);
+
     newNode.append("circle")
           .attr("r", d => d.r)
           .attr("fill", d => d.color || "grey")
           .attr("stroke", "black");
-    newNode.append("text")
-          .text(d => d.name)
-          .attr("text-anchor", "middle")
-          .attr("dy", ".35em");
+
+    let newNodeDiv = newNode.append("foreignObject")
+          .attr("width", d => d.r*2)
+          .attr("height", d => d.r*2)
+          .attr("x", d => -d.r)
+          .attr("y", d => -d.r)
+
+    let newNodeDivBody = newNodeDiv.append("xhtml:body")
+                                    .attr("class","bubble-body")
+                                    .append("div")
+                                    .attr("class","bubble-text-container")
+
+    newNodeDivBody.append("p")
+                  .attr("class", "task-name")
+                  .text(d => d.name)
+
+    newNodeDivBody.append("p")
+                  .attr("class", "task-description task-hidden-info")
+                  .text(d => d.description)
+
+    newNodeDivBody.append("p")
+                  .attr("class", "task-date task-hidden-info")
+                  .text(d => d.date)
+
+    newNodeDivBody.append("p")
+                  .attr("class", "task-time task-hidden-info")
+                  .text(d => d.timeRequired)
 
     attachHoverListeners(newNode);
     newNode.node().addEventListener("dblclick", attachPopListener);
