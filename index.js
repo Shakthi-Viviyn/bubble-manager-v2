@@ -3,6 +3,7 @@ const svg = d3.select("svg");
 let svgWidth = document.querySelector("svg").clientWidth;
 let svgHeight = document.querySelector("svg").clientHeight;
 
+// Set min date to today
 const currentDate = new Date();
 document.getElementById("dateTask").setAttribute("min",currentDate.toISOString().slice(0,10));
 
@@ -37,8 +38,9 @@ var nodes = [
     { name: "KJGDFHD", id: 28, x: 100, y: 900, r: 100, color: "#D4DC6C", date: "2023-10-01", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium", timeRequired: "7h 45m" },
     { name: "DHFJGHD", id: 29, x: 200, y: 800, r: 50, color: "#9292C8", date: "2023-10-01", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium", timeRequired: "11h 0m" },
     { name: "JFGHDFG", id: 30, x: 300, y: 700, r: 80, color: "#60DAAC", date: "2023-10-01", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium", timeRequired: "5h 15m" }
-  ];
+];
 
+// Create bubble elements
 var node = svg.selectAll(".node")
   .data(nodes)
   .enter()
@@ -79,24 +81,24 @@ divBody.append("p")
   .attr("class", "task-time task-hidden-info")
   .text(d => d.timeRequired)
 
-
+// Create simulation
 let simulation = d3.forceSimulation(nodes)
-    .force("x", d3.forceX(0).strength(0.05)) 
-    .force("y", d3.forceY(0).strength(0.05))
-    .force("center", d3.forceCenter(700, 400))
+    .force("x", d3.forceX(svgWidth/2).strength(0.05)) 
+    .force("y", d3.forceY(svgHeight/2).strength(0.05))
+    .force("center", d3.forceCenter(svgWidth/2, svgHeight/2))
     .force("collide", d3.forceCollide(d => d.r + 5).strength(0.8))
 
 simulation.on("tick", () => {
   node.attr("transform", d => {
-    d.x = Math.max(d.r, Math.min(svgWidth - d.r, d.x));
-    d.y = Math.max(d.r, Math.min(svgHeight - d.r, d.y));
+    d.x = Math.max(d.r, Math.min(svgWidth - d.r, d.x)); // keep bubbles within svg
+    d.y = Math.max(d.r, Math.min(svgHeight - d.r, d.y)); // keep bubbles within svg
     return `translate(${d.x}, ${d.y})`})
   if (simulation.alpha() < 0.001) {
     simulation.stop();
   }
 });
 
-
+// Attach drag listeners to bubbles
 node.call(d3.drag()
   .on("start", dragstarted)
   .on("drag", dragged)
@@ -117,6 +119,7 @@ function dragended(event, d) {
   d.fy = null;
 }
 
+// Attach hover listeners to bubbles to increase size on hover & show hidden info
 function attachHoverListeners(elm){
 
   let hoverElemOrigRad = 0;
@@ -156,13 +159,21 @@ function attachHoverListeners(elm){
   });
 
 }
+
+// Remove bubble when double clicked
 function attachPopListener(){
   d3.select(this).remove();
   nodes.splice(nodes.findIndex(node => node.id == this.attributes.id.value), 1);
   node = svg.selectAll(".node");
+
+  let radius = d3.select(this).select("circle").attr("r");
+  totalBubbleArea -= Math.PI * radius * radius;
+
   simulation.alpha(0.25).restart();
 }
 
+
+// Attach listeners to all bubbles on page load
 svg.selectAll(".node").each(function(d){
   attachHoverListeners(d3.select(this));
   this.addEventListener("dblclick", attachPopListener);
@@ -179,6 +190,7 @@ document.getElementById("closeBtn").addEventListener("click", () => {
 });
 
 
+// Get color selected by user
 function colorSelected(){
   if (document.getElementById("colorTask1").checked){
       return "#DB5657";
@@ -195,10 +207,11 @@ function colorSelected(){
   }
 }
 
+// Calculate radius of bubble based on date
 function calcRadius(date){
   date = new Date(date).getTime();
   var dayDiff = Math.abs((date - currentDate)/(1000 * 60 * 60 * 24));
-  
+
   if(dayDiff > 7){
       return 50;
   }else if((dayDiff <= 5)&&(dayDiff >= 2)){
@@ -208,6 +221,7 @@ function calcRadius(date){
   }
 }
 
+// Add new task to the canvas
 document.getElementById("addTaskBtn").addEventListener("click", () => {
 
     let name = document.getElementById("nameTask").value;
@@ -217,7 +231,7 @@ document.getElementById("addTaskBtn").addEventListener("click", () => {
     let color = colorSelected();
     let radius = calcRadius(date);
 
-    if (name === "" || date === "" || description === "") return;
+    // if (name === "" || date === "" || description === "") return;
 
     let id = new Date().getTime();
     let newData = {id: id, name:name, description: description, timeRequired: timeRequired, date: date, x: 0, y: 0, r: radius, color: color};
@@ -272,8 +286,43 @@ document.getElementById("addTaskBtn").addEventListener("click", () => {
         .on("drag", dragged)
         .on("end", dragended));
 
+    totalBubbleArea += Math.PI * radius * radius;
+    adjustScreenArea();
+
     node = svg.selectAll(".node");
     simulation.alpha(0.25).restart();
 });
+
+//Dynamically adjust screen size to fit all bubbles & recenter forces
+
+var screenWidth = 100; //css 100% width
+var screenHeight = 100; //css 100vh height
+
+let totalBubbleArea = 0;
+nodes.forEach(node => {
+  totalBubbleArea += Math.PI * node.r * node.r;
+});
+
+function reCenterForces(){
+  simulation.force("x", d3.forceX(svgWidth/2).strength(0.05));
+  simulation.force("y", d3.forceY(svgHeight/2).strength(0.05));
+  simulation.force("center", d3.forceCenter(svgWidth/2, svgHeight/2));
+  simulation.alpha(0.5).restart();
+}
+
+function adjustScreenArea(){
+  
+  while (totalBubbleArea > 0.6 * svgWidth * svgHeight){
+    screenWidth += 10; // adding 10% to width
+    screenHeight += 10; //adding 10vh to height
+    document.querySelector("svg").style.height = `${screenHeight}vh`;
+    document.querySelector("svg").style.width = `${screenWidth}%`;
+    svgWidth = document.querySelector("svg").clientWidth;
+    svgHeight = document.querySelector("svg").clientHeight;
+  }
+  reCenterForces();
+}
+
+adjustScreenArea();
 
 
