@@ -1,0 +1,24 @@
+{
+  "name": "bubble-manager-v2",
+  "version": "1.0.0",
+  "description": "Version 2 of bubble manager",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shakthi-Viviyn/bubble-manager-v2.git"
+  },
+  "author": "Shakthi viviyn Mahesh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Shakthi-Viviyn/bubble-manager-v2/issues"
+  },
+  "homepage": "https://github.com/Shakthi-Viviyn/bubble-manager-v2#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
