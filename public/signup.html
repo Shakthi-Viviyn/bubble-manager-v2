@@ -10,16 +10,17 @@
     <div class="loginContainer">
         <div class="loginFormContainer" action="/login" method="POST">
             <form class="loginForm">
+                <div id="errorMessageContainer" style="display: none;">
+                    <p id="errorMessage"></p>
+                </div>
                 <div class="inputElements"><input type="text" id="username" class="inputbox" maxlength="20" placeholder="Username" required></div>
                 <div class="inputElements"><input type="password" id="password" class="inputbox" maxlength="20" placeholder="Password" required></div>
-                <div class="inputElements"><input type="password" id="retype-password" class="inputbox" maxlength="20" placeholder="Retype Password" required></div>
+                <div class="inputElements"><input type="password" id="confirmPassword" class="inputbox" maxlength="20" placeholder="Retype Password" required></div>
                 <p>Already have an account? <a class="signuplink" href="/signup">Login</a></p>
-                <div class="submitBtnContainer"><input type="submit" id="loginBtn" value="Sign up"></div>
+                <div class="submitBtnContainer"><input type="button" id="signupBtn" value="Sign up"></div>
             </form>
         </div>
 </body>
-<script>
-    
-</script>
+<script src="signup.js"></script>
 </html>
 
