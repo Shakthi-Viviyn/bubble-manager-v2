@@ -12,33 +12,55 @@ document.getElementById("signupBtn").addEventListener("click", () => {
         displayErrorMessage("Please enter a username.");
         return;
     }
-    if (document.getElementById("password").value === ""){
-        displayErrorMessage("Please enter a password.");
-        return;
-    }
-    if (document.getElementById("password").value.length < 8){
-        displayErrorMessage("Password must be at least 8 characters.");
-        return;
-    }
-    if (document.getElementById("confirmPassword").value === ""){
-        displayErrorMessage("Please retype your password.");
-        return;
-    }
+    // if (document.getElementById("password").value === ""){
+    //     displayErrorMessage("Please enter a password.");
+    //     return;
+    // }
+    // if (document.getElementById("password").value.length < 8){
+    //     displayErrorMessage("Password must be at least 8 characters.");
+    //     return;
+    // }
+    // if (document.getElementById("confirmPassword").value === ""){
+    //     displayErrorMessage("Please retype your password.");
+    //     return;
+    // }
 
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
     let confirmPassword = document.getElementById("confirmPassword").value;
 
-    if (password !== confirmPassword){
-        displayErrorMessage("Passwords do not match.");
-        return;
+    // if (password !== confirmPassword){
+    //     displayErrorMessage("Passwords do not match.");
+    //     return;
+    // }
+    let accountData = {
+        username: username,
+        password: password
     }
-
+    let res;
     fetch("/signup", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({username: username, password: password})
-    })
+        body: JSON.stringify(accountData)
+    }).then((response) => {
+        res = response;
+        return response.json();
+    }).then((data) => {
+        console.log(res);
+        if (res.ok){
+            document.getElementById("errorMessageContainer").style.display = "block";
+            document.getElementById("errorMessageContainer").style.backgroundColor = "green";
+            document.getElementById("errorMessageContainer").style.borderLeft = "5px solid darkgreen";
+            document.getElementById("errorMessage").innerHTML = "Account created successfully";
+            setTimeout(() => {
+                window.location.replace("/login");
+            }, 3000);
+        }else{
+            displayErrorMessage(data.error);
+        }
+    }).catch((error) => {
+        displayErrorMessage("Please try again later")
+    });
 });

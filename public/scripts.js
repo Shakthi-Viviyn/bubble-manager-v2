@@ -9,8 +9,48 @@ document.getElementById("dateTask").setAttribute("min",currentDate.toISOString()
 
 let nodes = [];
 
-fetch("/data").then(res => res.json()).then(data => {
-  nodes = data;
+console.log(localStorage.getItem("token"));
+
+let jwtToken = localStorage.getItem("token");
+
+if (!jwtToken){
+  window.location.replace("/login");
+}
+
+const headers = {
+  "Content-Type": "application/json",
+  "Authorization": `Bearer ${jwtToken}`
+}
+
+// Calculate radius of bubble based on date
+function calcRadius(date){
+  date = new Date(date).getTime();
+  var dayDiff = (date - currentDate)/(1000 * 60 * 60 * 24);
+  if (dayDiff < 0){
+    dayDiff = 0;
+  }
+  if(dayDiff > 7){
+      return 50;
+  }else if((dayDiff <= 5)&&(dayDiff >= 2)){
+      return 80;
+  }else{
+      return 100;
+  }
+}
+
+function prepBubbleData(data){
+  let result = data.map(d => {
+    d.r = calcRadius(d.date);
+    d.x = 0
+    d.y = 0
+    return d;
+  })
+  return result;
+}
+
+fetch("/data", {headers}).then(res => res.json()).then(data => {
+  let nodes = prepBubbleData(data);
+  console.log(nodes);
 
 // Create bubble elements
 var node = svg.selectAll(".node")
@@ -134,14 +174,22 @@ function attachHoverListeners(elm){
 
 // Remove bubble when double clicked
 function attachPopListener(){
-  d3.select(this).remove();
-  nodes.splice(nodes.findIndex(node => node.id == this.attributes.id.value), 1);
-  node = svg.selectAll(".node");
+  fetch("/data", {
+    method: "DELETE",
+    headers: headers,
+    body: JSON.stringify({id: this.attributes.id.value})
+  }).then(res => res.json()).then(data => {
+    console.log(data);
 
-  let radius = d3.select(this).select("circle").attr("r");
-  totalBubbleArea -= Math.PI * radius * radius;
+    d3.select(this).remove();
+    nodes.splice(nodes.findIndex(node => node.id == this.attributes.id.value), 1);
+    node = svg.selectAll(".node");
 
-  simulation.alpha(0.25).restart();
+    let radius = d3.select(this).select("circle").attr("r");
+    totalBubbleArea -= Math.PI * radius * radius;
+
+    simulation.alpha(0.25).restart();
+  })
 }
 
 
@@ -179,19 +227,7 @@ function colorSelected(){
   }
 }
 
-// Calculate radius of bubble based on date
-function calcRadius(date){
-  date = new Date(date).getTime();
-  var dayDiff = Math.abs((date - currentDate)/(1000 * 60 * 60 * 24));
 
-  if(dayDiff > 7){
-      return 50;
-  }else if((dayDiff <= 5)&&(dayDiff >= 2)){
-      return 80;
-  }else{
-      return 100;
-  }
-}
 
 // Add new task to the canvas
 document.getElementById("addTaskBtn").addEventListener("click", () => {
@@ -206,63 +242,77 @@ document.getElementById("addTaskBtn").addEventListener("click", () => {
     if (name === "" || date === "" || description === "") return;
 
     let id = new Date().getTime();
-    let newData = {id: id, name:name, description: description, timeRequired: timeRequired, date: date, x: 0, y: 0, r: radius, color: color};
+    let newData = {name:name, description: description, timeRequired: timeRequired, date: date, color: color};
 
-    nodes.push(newData);
+    fetch("/data", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(newData)
+    }).then(res => res.json()).then(data => {
+      console.log(data);
+      newData.id = data.id;
+      newData.r = radius;
+      newData.x = 0;  
+      newData.y = 0;
 
-    let newNode = svg.append("g")
-                  .data([newData])
-                  .attr("class", "node")
-                  .attr("id", d => d.id)
-                  .attr("transform", d => `translate(${d.x}, ${d.y})`);
+      //x: 0, y: 0, r: radius,
 
-    newNode.append("circle")
-          .attr("r", d => d.r)
-          .attr("fill", d => d.color || "grey")
-          .attr("stroke", "black");
+      nodes.push(newData);
 
-    let newNodeDiv = newNode.append("foreignObject")
-          .attr("width", d => d.r*2)
-          .attr("height", d => d.r*2)
-          .attr("x", d => -d.r)
-          .attr("y", d => -d.r)
+      let newNode = svg.append("g")
+                    .data([newData])
+                    .attr("class", "node")
+                    .attr("id", d => d.id)
+                    .attr("transform", d => `translate(${d.x}, ${d.y})`);
 
-    let newNodeDivBody = newNodeDiv.append("xhtml:body")
-                                    .attr("class","bubble-body")
-                                    .append("div")
-                                    .attr("class","bubble-text-container")
+      newNode.append("circle")
+            .attr("r", d => d.r)
+            .attr("fill", d => d.color || "grey")
+            .attr("stroke", "black");
 
-    newNodeDivBody.append("p")
-                  .attr("class", "task-name")
-                  .text(d => d.name)
+      let newNodeDiv = newNode.append("foreignObject")
+            .attr("width", d => d.r*2)
+            .attr("height", d => d.r*2)
+            .attr("x", d => -d.r)
+            .attr("y", d => -d.r)
 
-    newNodeDivBody.append("p")
-                  .attr("class", "task-description task-hidden-info")
-                  .text(d => d.description)
+      let newNodeDivBody = newNodeDiv.append("xhtml:body")
+                                      .attr("class","bubble-body")
+                                      .append("div")
+                                      .attr("class","bubble-text-container")
 
-    newNodeDivBody.append("p")
-                  .attr("class", "task-date task-hidden-info")
-                  .text(d => d.date)
+      newNodeDivBody.append("p")
+                    .attr("class", "task-name")
+                    .text(d => d.name)
 
-    newNodeDivBody.append("p")
-                  .attr("class", "task-time task-hidden-info")
-                  .text(d => d.timeRequired)
+      newNodeDivBody.append("p")
+                    .attr("class", "task-description task-hidden-info")
+                    .text(d => d.description)
 
-    attachHoverListeners(newNode);
-    newNode.node().addEventListener("dblclick", attachPopListener);
-    
-    simulation.nodes(nodes);
-    
-    newNode.call(d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended));
+      newNodeDivBody.append("p")
+                    .attr("class", "task-date task-hidden-info")
+                    .text(d => d.date)
 
-    totalBubbleArea += Math.PI * radius * radius;
-    adjustScreenArea();
+      newNodeDivBody.append("p")
+                    .attr("class", "task-time task-hidden-info")
+                    .text(d => d.timeRequired)
 
-    node = svg.selectAll(".node");
-    simulation.alpha(0.25).restart();
+      attachHoverListeners(newNode);
+      newNode.node().addEventListener("dblclick", attachPopListener);
+      
+      simulation.nodes(nodes);
+      
+      newNode.call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
+
+      totalBubbleArea += Math.PI * radius * radius;
+      adjustScreenArea();
+
+      node = svg.selectAll(".node");
+      simulation.alpha(0.25).restart();
+    });
 });
 
 //Dynamically adjust screen size to fit all bubbles & recenter forces

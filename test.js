@@ -1,65 +1,11 @@
-import express from 'express';
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import mongoose from 'mongoose';
-import {config} from 'dotenv';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import mongoose from "mongoose";
 
+import { config } from "dotenv";
 config();
-const saltRounds = 8;
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 mongoose.connect(`mongodb+srv://bubblemanageradmin:${process.env.mongoPassword}@devdatacluster.gruur93.mongodb.net/BubbleDB`);
 
-const bubbleSchema = new mongoose.Schema({
-    name: String,
-    color: String,
-    date: String,
-    description: String,
-    timeRequired: String
-});
-
-const userSchema = new mongoose.Schema({
-    username: String,
-    password: String,
-    bubbles: [bubbleSchema]
-});
-
-const User = mongoose.model("User", userSchema);
-
-const app = express();
-const port = 3000;
-
-app.use(express.static(__dirname + '/public'));
-
-app.use(express.json());
-
-let username;
-// custom middleware to authenticate user
-app.use((req, res, next) => {
-    console.log(req.path);
-    if (req.path === "/login" || req.path === "/signup"){
-        next();
-        return;
-    }
-    let token = req.headers.authorization;
-    if (!token){
-        res.status(401).json({error: "Please login"});
-        return;
-    }
-    token = token.split(" ")[1];
-    jwt.verify(token, process.env.jwtSecret, (err, decoded) => {
-        if (err){
-            res.status(401).json({error: "Please login"});
-            return;
-        }
-        username = decoded["username"];
-        console.log(username + " verification passed")
-        next();
-    })
-})
+// console.log(mongoose.connection.readyState);
 
 var nodes = [
     { name: "aaaaaaa", id: 1, x: 100, y: 100, r: 100, color: "#DB5657", date: "2023-10-01", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium", timeRequired: "12h 30m" },
@@ -94,125 +40,27 @@ var nodes = [
     { name: "JFGHDFG", id: 30, x: 300, y: 700, r: 80, color: "#60DAAC", date: "2023-10-01", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium", timeRequired: "5h 15m" }
 ];
 
-app.get('/', (req, res) => {
-    res.redirect("/login");
-    // res.sendFile(__dirname + '/index.html');
+const bubbleSchema = new mongoose.Schema({
+    name: String,
+    color: String,
+    date: String,
+    description: String,
+    timeRequired: String
 });
 
-app.get('/login', (req, res) => {
-    res.sendFile(__dirname + '/public/login.html');
+const userSchema = new mongoose.Schema({
+    username: String,
+    password: String,
+    bubbles: [bubbleSchema]
 });
 
-app.post('/login', (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
+const User = mongoose.model("User", userSchema);
 
-    (async () => {
-        let userData = await User.find({username: username}, {username: 1, password: 1});
-        console.log(userData);
-        if (userData.length === 0){
-            res.status(401).json({error: "Username or password is incorrect"});
-            return;
-        }
-        let hash = userData[0].password;
-        bcrypt.compare(password, hash, (err, result) => {
-            if (result){
-                let token = jwt.sign({username: username}, process.env.jwtSecret, {expiresIn: '2d'});
-                console.log(token);
-                res.status(200).json({token: token, message: "Login successful"});
-            }else{
-                console.log(err);
-                res.status(401).json({error: "Username or password is incorrect"});
-            }
-        })
-    })()
-})
-
-app.get('/signup', (req, res) => {
-    res.sendFile(__dirname + '/public/signup.html');
-});
-
-app.post('/signup', (req, res) => {
-    console.log(req.body);
-    let username = req.body.username;
-    let password = req.body.password;
-    // additional server side checks for username and password
-    if (username === ""){
-        res.status(400).json({error: "Please enter a username."});
-        return;
-    }
-    if (password === ""){
-        res.status(400).json({error: "Please enter a password."});
-        return;
-    }
-    (async () => {
-        //Username already exsists check
-        let existingUser = await User.find({username: username}, {username: 1});
-        if (existingUser.length > 0){
-            console.log(existingUser)
-            console.log("Username already exists");
-            res.status(409).json({error: "Username already taken"});
-            return;
-        }
-        // Create a hash for the password
-        bcrypt.hash(password, saltRounds, function(err, hash) {
-            if (!err){
-                let newUser = new User({
-                    username: username,
-                    password: hash,
-                    bubbles: []
-                });
-                //Save the userData to the database
-                newUser.save();
-                res.status(200).send({message: "User created successfully."});
-            }else{
-                console.log(err);
-                res.status(500).json({error: "Please try again later"});
-            }
-        });
-        
-    })()
-});
-
-app.get("/data", (req, res) => {
-    (async () => {
-        let user = await User.find({username: "shakthi"}, {_id: 0, bubbles: 1});
-        // deep copying the array of tasks
-        let bubbleData = JSON.parse(JSON.stringify(user[0].bubbles).replace(/_id/g, "id"));
-        res.json(bubbleData)
-    })();
-});
-
-app.post("/data", (req, res) => {
-    let bubbleData = req.body;
-    console.log(bubbleData);
-    (async () => {
-        let user = await User.findOne({username: username});
-        user.bubbles.push(bubbleData);
-        user.save();
-        let newBubble = user.bubbles[user.bubbles.length - 1];
-        console.log(newBubble._id);
-        res.json({id: newBubble._id});
-    })()
-});
-
-app.delete("/data", (req, res) => {
-    let bubbleId = req.body.id;
-    console.log(bubbleId);
-    (async () => {
-        // let user = await User.findOne({username: username});
-        // let bubbleIndex = user.bubbles.findIndex((bubble) => {
-        //     return bubble._id == bubbleId;
-        // });
-        // user.bubbles.splice(bubbleIndex, 1);
-        // user.save();
-        let modifiedUser = await User.findOneAndUpdate({username: username}, {$pull: {bubbles: {_id: bubbleId}}});
-        console.log(modifiedUser);
-        res.json({message: "Bubble deleted successfully"});
-    })()
-});
-
-
-app.listen(port, () => {
-    console.log(`Server started on port ${port}`);
-});
+(async() => {
+    let user = await User.find({username: "shakthi"}, {_id: 0, bubbles: 1});
+    let bubbleData = user[0].bubbles;
+    console.log(bubbleData[0].id);
+    User.updateOne({username: "shakthi"}, {$set: {bubbles: nodes}}).then((err, result) => {
+        console.log(result);
+    });
+})()

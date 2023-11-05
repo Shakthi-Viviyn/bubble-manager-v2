@@ -19,12 +19,30 @@ document.getElementById("loginBtn").addEventListener("click", () => {
 
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
-
-    fetch("/signup", {
+    let res;
+    fetch("/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({username: username, password: password})
+    }).then((response) => {
+        res = response;
+        return response.json();
+    }).then((data) => {
+        if (res.ok){
+            document.getElementById("errorMessageContainer").style.display = "block";
+            document.getElementById("errorMessageContainer").style.backgroundColor = "green";
+            document.getElementById("errorMessageContainer").style.borderLeft = "5px solid darkgreen";
+            document.getElementById("errorMessage").innerHTML = "Login successful";
+            localStorage.setItem("token", data.token);
+            setTimeout(() => {
+                window.location.replace("/");
+            }, 3000);
+        }else{
+            displayErrorMessage(data.error);
+        }
+    }).catch((error) => {
+        console.log(error);
     })
 });
