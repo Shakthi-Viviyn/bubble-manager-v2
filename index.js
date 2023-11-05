@@ -45,25 +45,22 @@ app.use((req, res, next) => {
     }
     let token = req.headers.authorization;
     if (!token){
-        res.status(401).json({error: "Please login"});
         res.redirect("/login");
         return;
     }
     token = token.split(" ")[1];
     jwt.verify(token, process.env.jwtSecret, (err, decoded) => {
         if (err){
-            res.status(401).json({error: "Please login"});
             res.redirect("/login");
             return;
         }
         username = decoded["username"];
         next();
     })
-})
+});
 
 app.get('/', (req, res) => {
-    res.redirect("/login");
-    // res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/index.html');
 });
 
 app.get('/login', (req, res) => {
@@ -91,7 +88,7 @@ app.post('/login', (req, res) => {
             }
         })
     })()
-})
+});
 
 app.get('/signup', (req, res) => {
     res.sendFile(__dirname + '/public/signup.html');
@@ -122,7 +119,58 @@ app.post('/signup', (req, res) => {
                 let newUser = new User({
                     username: username,
                     password: hash,
-                    bubbles: []
+                    bubbles: [
+                        {
+                            "name": "Hover me",
+                            "color": "#3DC7C7",
+                            "date": "2023-11-05",
+                            "description": "Double click to pop your task bubble",
+                            "timeRequired": "",
+
+                        },
+                        {
+                            "name": "Me too",
+                            "color": "#D4DC6C",
+                            "date": "2023-11-05",
+                            "description": "Click the plus icon to add tasks. Name, description & data are mandatory.",
+                            "timeRequired": "",
+                        },
+                        {
+                            "name": "And me",
+                            "color": "#67BB6D",
+                            "date": "2023-11-05",
+                            "description": "There is limit on the length of name and description. And yes you can choose color of the bubbles.",
+                            "timeRequired": "",
+                        },
+                        {
+                            "name": "Hello",
+                            "color": "#9292C8",
+                            "date": "2099-12-31",
+                            "description": "There is more. The size of bubbles change dynamically based on the deadline to help you identify the most important tasks.",
+                            "timeRequired": "",
+                        },
+                        {
+                            "name": "Enjoy 🥳",
+                            "color": "#DB5657",
+                            "date": "2099-12-31",
+                            "description": "Have fun and if you want to leave you can logout using the menu.",
+                            "timeRequired": "",
+                        },
+                        {
+                            "name": "1️⃣2️⃣3️⃣",
+                            "color": "#3DC7C7",
+                            "date": "2099-12-31",
+                            "description": "Yes there are three sizes.",
+                            "timeRequired": "",
+                        },
+                        {
+                            "name": "Welcome",
+                            "color": "#DB5657",
+                            "date": "2023-11-05",
+                            "description": "Hi this is your bubble manager. And no, this is not your regular task manager. It is much better.",
+                            "timeRequired": "",
+                        }
+                    ]
                 });
                 //Save the userData to the database
                 newUser.save();
@@ -137,8 +185,6 @@ app.post('/signup', (req, res) => {
 });
 
 app.get("/data", (req, res) => {
-    // res.status(401).json({error: "Please try again later"});
-    // return;
     (async () => {
         try{
             let user = await User.find({username: username}, {_id: 0, bubbles: 1});
@@ -172,7 +218,7 @@ app.delete("/data", (req, res) => {
     let bubbleId = req.body.id;
     try{
         (async () => {
-            let modifiedUser = await User.findOneAndUpdate({username: username}, {$pull: {bubbles: {_id: bubbleId}}});
+            await User.findOneAndUpdate({username: username}, {$pull: {bubbles: {_id: bubbleId}}});
             res.json({message: "Bubble deleted successfully"});
         })()
     }catch(err){

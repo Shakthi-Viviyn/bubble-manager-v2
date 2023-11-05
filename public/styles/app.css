@@ -24,8 +24,13 @@ body {
     background-position: center;
     border: none;
     cursor: pointer;
-    transition: box-shadow 0.3s ease-in-out;
+    transition: transform 0.2s, box-shadow 0.2s;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#closeBtn:hover{
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 #addMenu{
@@ -61,17 +66,19 @@ body {
     height: 50px;
     z-index: 100;
     background-image: url("/icons/plus.png");
+    background-color: whitesmoke;
     border-radius: 50%;
-    border: 2px solid grey;
+    border: none;
     background-size: cover;
     background-position: center;
-    transition: box-shadow 0.3s ease-in-out;
+    transition: transform 0.2s, box-shadow 0.2s;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
 }
 
-#addBtn:hover {
-    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
+#addMenuBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 label{
@@ -99,8 +106,57 @@ label{
     font-family: Arial, Helvetica, sans-serif;
     font-size: 16px;
     cursor: pointer;
-    transition: box-shadow 0.3s ease-in-out;
+    transition: transform 0.2s, box-shadow 0.2s;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#addTaskBtn:hover{
+    transform: scale(1.1);
+}
+
+#userMenuBtn{
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    width: 40px;
+    height: 40px;
+    z-index: 100;
+    background-image: url("/icons/menu.svg");
+    border-radius: 5px;
+    border: none;
+    background-color: whitesmoke;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); */
+    cursor: pointer;
+}
+
+#userMenuBtn:hover{
+    transform: scale(1.1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+#logoutBtn{
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    width: 40px;
+    height: 40px;
+    z-index: 99;
+    background-image: url("/icons/logout.svg");
+    border-radius: 5px;
+    border: none;
+    background-color: whitesmoke;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.2s, box-shadow 0.2s, top 0.4s ease-in-out;
+    cursor: pointer;
+}
+
+#logoutBtn:hover{
+    transform: scale(1.1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 .inputElements{

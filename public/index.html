@@ -9,14 +9,16 @@
 <body>
     <svg class="canvas"></svg>
     <button id="addMenuBtn"></button>
+    <button id="logoutBtn"></button>
+    <button id="userMenuBtn"></button>
     <div id="addMenu">
         <div class="closeBtnContainer">
             <button id="closeBtn"></button>
         </div>
         <div id="formContainer">
         <form class="formGroup">
-            <div class="inputElements"><label>Task Name: </label><input type="text" id="nameTask" maxlength="7" required></div>
-            <div class="inputElements"><label>Task Description: </label><input type="text" id="descriptionTask" maxlength="120" required></div>
+            <div class="inputElements"><label>Task Name: </label><input type="text" id="nameTask" maxlength="9" required></div>
+            <div class="inputElements"><label>Task Description: </label><input type="text" id="descriptionTask" maxlength="130" required></div>
             <div class="inputElements"><label>Completion Date: </label><input type="date" id="dateTask" min="" required></div>
             <div class="inputElements"><label>Time Required: </label><input type="text" id="timeTask" maxlength="12"></div>
             <div class="inputElements">

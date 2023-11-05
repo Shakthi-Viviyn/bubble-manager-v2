@@ -55,7 +55,8 @@ fetch("/data", {headers}).then(res => {
     }
     return res.json();
   }).then(data => {
-  let nodes = prepBubbleData(data);
+
+  nodes = prepBubbleData(data);
 
   // Create bubble elements
   var node = svg.selectAll(".node")
@@ -141,6 +142,8 @@ fetch("/data", {headers}).then(res => {
 
     let hoverElemOrigRad = 0;
 
+    let hoverEnterTimeoutId;
+
     elm.on("mouseenter", (event, d) => {
       event.stopPropagation();
       hoverElemOrigRad = d.r;
@@ -149,10 +152,10 @@ fetch("/data", {headers}).then(res => {
         elm.raise();
         elm.select("circle").transition().duration(500).attr("r", d.r);
 
-        elm.select("foreignObject").attr("width", "240").attr("height", "240").attr("x", "-120").attr("y", "-120")
-        elm.select("foreignObject").selectAll(".task-hidden-info").style("display", "block");
-
-        setTimeout(() => {
+        if (hoverEnterTimeoutId) clearTimeout(hoverEnterTimeoutId);
+        hoverEnterTimeoutId = setTimeout(() => {
+          elm.select("foreignObject").attr("width", "240").attr("height", "240").attr("x", "-120").attr("y", "-120")
+          elm.select("foreignObject").selectAll(".task-hidden-info").style("display", "block");
           simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.5));
           simulation.alpha(0.1).restart();
         }, 250);
@@ -168,6 +171,7 @@ fetch("/data", {headers}).then(res => {
         elm.select("foreignObject").attr("width", d.r*2).attr("height", d.r*2).attr("x", -d.r).attr("y", -d.r)
         elm.select("foreignObject").selectAll(".task-hidden-info").style("display", "none");
 
+        if (hoverEnterTimeoutId) clearTimeout(hoverEnterTimeoutId);
         setTimeout(() => {
           simulation.force("collide", d3.forceCollide(d => d.r + 5).strength(0.8));
           simulation.alpha(0.1).restart();
@@ -221,6 +225,21 @@ fetch("/data", {headers}).then(res => {
   document.getElementById("closeBtn").addEventListener("click", () => {
     document.getElementById("addMenu").style.visibility = "hidden";
     document.getElementById("addMenuBtn").style.visibility = "visible";
+  });
+
+  let showTimeoutId;
+
+  document.getElementById("userMenuBtn").addEventListener("mouseenter", () => {
+    document.getElementById("logoutBtn").style.top = "90px";
+    if (showTimeoutId) clearTimeout(showTimeoutId);
+    showTimeoutId = setTimeout(() => {
+      document.getElementById("logoutBtn").style.top = "30px";
+    }, 3500);
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("token");
+    window.location.replace("/login");
   });
 
 
