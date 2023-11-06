@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.static(__dirname + '/public'));
 
@@ -188,9 +188,13 @@ app.get("/data", (req, res) => {
     (async () => {
         try{
             let user = await User.find({username: username}, {_id: 0, bubbles: 1});
-            // deep copying the array of tasks
-            let bubbleData = JSON.parse(JSON.stringify(user[0].bubbles).replace(/_id/g, "id"));
-            res.json(bubbleData)
+            if (user != []) {
+                // deep copying the array of tasks
+                let bubbleData = JSON.parse(JSON.stringify(user[0].bubbles).replace(/_id/g, "id"));
+                res.json(bubbleData)
+                return;
+            }
+            res.status(401).json({error: "Login in again"})
         }catch(err){
             console.log(err);
             res.status(500).json({error: "Please try again later"});
